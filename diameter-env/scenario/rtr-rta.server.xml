@@ -1,0 +1,160 @@
+<!--
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ (c)Copyright 2006 Hewlett-Packard Development Company, LP.
+
+-->
+
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<scenario>
+
+<init>
+  <receive channel="channel-1">
+    <command name="CER">
+    </command>
+    <action>
+      <store name="HbH" entity="HbH-id"></store>
+      <store name="E2E" entity="EtE-id"></store>
+    </action>
+  </receive>
+
+  <send channel="channel-1">
+    <action>
+      <restore name="HbH" entity="HbH-id"> </restore>
+      <restore name="E2E" entity="EtE-id"> </restore>
+    </action>
+    <command name="CEA">
+      <avp name="Result-Code" value="2001"> </avp>
+      <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
+      <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
+      <avp name="Host-IP-Address" value="SEAGULL_LOCAL_IP_AS_HEX"> </avp>
+      <avp name="Vendor-Id" value="10415"> </avp>
+      <avp name="Product-Name" value="Seagull"> </avp>
+      <avp name="Firmware-Revision" value="1"> </avp>
+    </command>
+  </send>
+</init>
+
+<traffic>
+  <receive channel="channel-1">
+    <command name="MAR">
+      <avp name="Session-Id" value="dont_care"> </avp>
+    </command>
+    <action>
+      <store name="HbH" entity="HbH-id"></store>
+      <store name="E2E" entity="EtE-id"></store>
+      <store name="sid" entity="Session-Id"></store>
+    </action>
+  </receive>
+
+  <send channel="channel-1">
+    <action>
+      <restore name="HbH" entity="HbH-id"> </restore>
+      <restore name="E2E" entity="EtE-id"> </restore>
+      <restore name="sid" entity="Session-Id"> </restore>
+    </action>
+    <command name="MAA">
+      <avp name="Session-Id" value="will_be_erased"> </avp>
+      <avp name="Vendor-Specific-Application-Id">
+        <avp name="Vendor-Id" value="10415"></avp>
+        <avp name="Auth-Application-Id" value="16777216"></avp>
+      </avp>
+      <avp name="Auth-Session-State" value="1"> </avp>
+      <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
+      <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
+      <avp name="Result-Code" value="2001"> </avp>
+      <avp name="User-Name" value="USER_NAME"> </avp>
+      <avp name="Public-Identity" value="sip:USER_NAME"> </avp>
+      <avp name="SIP-Number-Auth-Items" value="1"> </avp>
+      <avp name="SIP-Auth-Data-Item">
+        <avp name="SIP-Authentication-Scheme" value="SIP Digest"> </avp>
+        <avp name="SIP-Digest-Authenticate">
+          <avp name="Digest-Realm" value="DEST_REALM"> </avp>
+          <avp name="Digest-QoP" value="auth"> </avp>
+          <avp name="Digest-HA1" value="519D16357"> </avp>
+          <avp name="Digest-Algorithm" value="MD5"> </avp>
+        </avp>
+      </avp>
+    </command>
+  </send>
+
+  <receive channel="channel-1">
+    <command name="SAR">
+      <!-- Only need to specify what needs to be parsed -->
+      <avp name="Session-Id" value="dont_care"> </avp>
+    </command>
+    <!-- Store action is at the end of the command -->
+    <action>
+      <store name="HbH" entity="HbH-id"></store>
+      <store name="E2E" entity="EtE-id"></store>
+      <store name="sid" entity="Session-Id"></store>
+    </action>
+  </receive>
+
+  <send channel="channel-1">
+    <!-- Restore action is before the command -->
+    <action>
+      <restore name="HbH" entity="HbH-id"> </restore>
+      <restore name="E2E" entity="EtE-id"> </restore>
+      <restore name="sid" entity="Session-Id"> </restore>
+    </action>
+    <!-- Warning: content of SAA to check -->
+    <command name="SAA">
+      <avp name="Session-Id" value="will_be_erased"> </avp>
+      <avp name="Vendor-Specific-Application-Id">
+        <avp name="Vendor-Id" value="10415"></avp>
+        <avp name="Auth-Application-Id" value="16777216"></avp>
+      </avp>
+      <avp name="Auth-Session-State" value="1"> </avp>
+      <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
+      <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
+      <avp name="Result-Code" value="2001"> </avp>
+      <avp name="User-Name" value="USER_NAME"> </avp>
+      <avp name="User-Data" value="<?xml?><IMSSubscription><PrivateID>USER_NAME</PrivateID><ServiceProfile><PublicIdentity><Identity>sip:USER_NAME</Identity></PublicIdentity></ServiceProfile></IMSSubscription>"> </avp>
+    </command>
+  </send>
+
+  <send channel="channel-1">
+    <command name="RTR">
+      <avp name="Session-Id" value="SESSION_ID"> </avp>
+      <avp name="Destination-Host" value="DEST_HOST"> </avp>
+      <avp name="Deregistration-Reason">
+        <avp name="Reason-Code" value="0"> </avp>
+      </avp>
+      <avp name="User-Name" value="USER_NAME"> </avp>
+      <avp name="Destination-Realm" value="DEST_REALM"> </avp>
+      <avp name="Auth-Session-State" value="1"> </avp>
+      <avp name="Auth-Application-Id" value="16777216"> </avp>
+      <avp name="Supported-Features">
+        <avp name="Vendor-Id" value="10415"></avp>
+        <avp name="Feature-List-ID" value="1"></avp>
+        <avp name="Feature-List" value="1"></avp>
+      </avp>
+      <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
+      <avp name="Vendor-Specific-Application-Id">
+        <avp name="Vendor-Id" value="10415"></avp>
+        <avp name="Auth-Application-Id" value="16777216"></avp>
+      </avp>
+      <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
+    </command>
+  </send>
+
+  <receive channel="channel-1">
+    <command name="RTA">
+    </command>
+  </receive>
+</traffic>
+</scenario>
