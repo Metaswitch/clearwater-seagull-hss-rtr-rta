@@ -48,49 +48,33 @@
   </send>
 </init>
 
-<traffic>
+<default>
   <receive channel="channel-1">
-    <command name="MAR">
-      <avp name="Session-Id" value="dont_care"> </avp>
+    <command name="DWR">
     </command>
+    <!-- Store action is at the end of the command -->
     <action>
       <store name="HbH" entity="HbH-id"></store>
       <store name="E2E" entity="EtE-id"></store>
-      <store name="sid" entity="Session-Id"></store>
     </action>
   </receive>
 
   <send channel="channel-1">
+    <!-- Restore action is before the command -->
     <action>
       <restore name="HbH" entity="HbH-id"> </restore>
       <restore name="E2E" entity="EtE-id"> </restore>
-      <restore name="sid" entity="Session-Id"> </restore>
     </action>
-    <command name="MAA">
-      <avp name="Session-Id" value="will_be_erased"> </avp>
-      <avp name="Vendor-Specific-Application-Id">
-        <avp name="Vendor-Id" value="10415"></avp>
-        <avp name="Auth-Application-Id" value="16777216"></avp>
-      </avp>
-      <avp name="Auth-Session-State" value="1"> </avp>
+    <!-- Warning: content of DWA to check -->
+    <command name="DWA">
       <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
       <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
       <avp name="Result-Code" value="2001"> </avp>
-      <avp name="User-Name" value="USER_NAME"> </avp>
-      <avp name="Public-Identity" value="sip:USER_NAME"> </avp>
-      <avp name="SIP-Number-Auth-Items" value="1"> </avp>
-      <avp name="SIP-Auth-Data-Item">
-        <avp name="SIP-Authentication-Scheme" value="SIP Digest"> </avp>
-        <avp name="SIP-Digest-Authenticate">
-          <avp name="Digest-Realm" value="DEST_REALM"> </avp>
-          <avp name="Digest-QoP" value="auth"> </avp>
-          <avp name="Digest-HA1" value="519D16357"> </avp>
-          <avp name="Digest-Algorithm" value="MD5"> </avp>
-        </avp>
-      </avp>
     </command>
   </send>
+</default>
 
+<traffic>
   <receive channel="channel-1">
     <command name="SAR">
       <!-- Only need to specify what needs to be parsed -->
@@ -101,6 +85,8 @@
       <store name="HbH" entity="HbH-id"></store>
       <store name="E2E" entity="EtE-id"></store>
       <store name="sid" entity="Session-Id"></store>
+      <store name="username" entity="User-Name"></store>
+      <store name="publicidentity" entity="Public-Identity"></store>
     </action>
   </receive>
 
@@ -110,6 +96,7 @@
       <restore name="HbH" entity="HbH-id"> </restore>
       <restore name="E2E" entity="EtE-id"> </restore>
       <restore name="sid" entity="Session-Id"> </restore>
+      <set-value name="User-Data" format="<?xml version='1.0' encoding='UTF-8'?><IMSSubscription><PrivateID>$(username)</PrivateID><ServiceProfile><PublicIdentity><Identity>$(publicidentity)</Identity></PublicIdentity></ServiceProfile></IMSSubscription>"></set-value>
     </action>
     <!-- Warning: content of SAA to check -->
     <command name="SAA">
@@ -122,20 +109,19 @@
       <avp name="Origin-Host" value="hss.seagull.HOME_DOMAIN"> </avp>
       <avp name="Origin-Realm" value="HOME_DOMAIN"> </avp>
       <avp name="Result-Code" value="2001"> </avp>
-      <avp name="User-Name" value="USER_NAME"> </avp>
-      <avp name="User-Data" value="<?xml?><IMSSubscription><PrivateID>USER_NAME</PrivateID><ServiceProfile><PublicIdentity><Identity>sip:USER_NAME</Identity></PublicIdentity></ServiceProfile></IMSSubscription>"> </avp>
+      <avp name="User-Data" value="set"> </avp>
     </command>
   </send>
 
   <send channel="channel-1">
     <command name="RTR">
-      <avp name="Session-Id" value="SESSION_ID"> </avp>
-      <avp name="Destination-Host" value="DEST_HOST"> </avp>
+      <avp name="Session-Id" value="dont_care"> </avp>
+      <avp name="Destination-Host" value="PUBLIC_HOSTNAME"> </avp>
       <avp name="Deregistration-Reason">
         <avp name="Reason-Code" value="0"> </avp>
       </avp>
       <avp name="User-Name" value="USER_NAME"> </avp>
-      <avp name="Destination-Realm" value="DEST_REALM"> </avp>
+      <avp name="Destination-Realm" value="hs.HOME_DOMAIN"> </avp>
       <avp name="Auth-Session-State" value="1"> </avp>
       <avp name="Auth-Application-Id" value="16777216"> </avp>
       <avp name="Supported-Features">
